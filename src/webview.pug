@@ -1,0 +1,147 @@
+doctype html
+html(lang="en")
+  head
+    title= filename
+    style.
+      * {
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .container {
+        padding: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .vscode-dark .container {
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+
+      .header h1 {
+        font-weight: normal;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .header span {
+        display: block;
+        font-size: 1rem;
+        margin-top: 0.25rem;
+      }
+
+      .detail h2 {
+        font-weight: normal;
+        font-size: 1em;
+      }
+
+      .metadata {
+        display: flex;
+        margin-bottom: 0.75rem;
+      }
+
+      .metadata li {
+        list-style-type: none;
+        display: block;
+        padding: 0.25rem 0;
+      }
+
+      .metadata li + li {
+        padding-left: 0.6rem;
+        margin-left: 0.6rem;
+        border-left: 1px solid;
+      }
+
+      .vscode-dark .metadata li {
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .vscode-light .metadata li {
+        border-color: rgba(0, 0, 0, 0.2);
+      }
+
+      .img {
+        max-width: 150px;
+        margin-right: 1rem;
+      }
+
+      .img img {
+        width: 100%;
+      }
+
+      a {
+        color: var(--vscode-textLink-foreground);
+        text-decoration: none;
+      }
+
+      a:hover {
+        color: var(--vscode-textLink-activeForeground);
+      }
+
+      .install {
+        color: var(--vscode-button-foreground);
+        background: var(--vscode-button-background);
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 0.5rem;
+        border: none;
+        cursor: pointer;
+      }
+
+      .install:disabled {
+        opacity: 0.7;
+      }
+
+      .install:hover,
+      .install:focus {
+        background: var(--vscode-button-hoverBackground);
+      }
+  body
+    .container
+      .header
+        .img: img(src=iconDataUri, title=name)
+        .detail
+          h1
+            = displayName
+            span= id
+          ul.metadata
+            if repository
+              li: a(href=repository.url) Repository
+            if license
+              li: a(href=`https://opensource.org/licenses/${license}`) License: #{license}
+            li= version
+            li: a(href=`https://marketplace.visualstudio.com/items?itemName=${publisher}.${name}`) Marketplace
+          h2= description
+      button.install
+        if installedCmp == undefined
+          | Install
+        else if installedCmp > 0
+          | Upgrade from #{installed.packageJSON.version}
+        else if installedCmp < 0
+          | Downgrade from #{installed.packageJSON.version}
+        else
+          | Reinstall
+
+
+    script.
+      const api = acquireVsCodeApi();
+      const $install = document.querySelector('.install');
+
+      $install.addEventListener('click', () => {
+        $install.disabled = true;
+        $install.innerHTML = 'Installing...';
+        api.postMessage({ command: 'install' });
+      });
